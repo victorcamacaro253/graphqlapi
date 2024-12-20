@@ -1,10 +1,16 @@
 import userModel from '../models/userModel.js'
 import {hash,compare} from 'bcrypt'
 import tokenService from '../services/tokenService.js';
+import { randomBytes } from 'crypto';
 
-const resolvers = {
+const userResolvers = {
     Query: {
-        users: () => userModel.getUsers(),
+        users: async (_,__,{user}) => {
+            if(!user){
+                throw new Error('No autenticado')
+            }
+            return await userModel.getUsers()
+        },
         user: async (_, { user_id }) => {
             const user = await userModel.getUserById(user_id);
             if (!user) {
@@ -75,9 +81,16 @@ const resolvers = {
 
         
        const token= tokenService.generateToken(user.id,user.correo,user.rol,'1h')
+       
+      const refreshToken = tokenService.generateToken(user.id,user.correo,user.rol,'7d')
+
+
+       //const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);  // Expira en 7 días
 
        return {
-        token,user
+        token,
+       refreshToken,
+        user
        }
 
     }
@@ -86,4 +99,4 @@ const resolvers = {
 }
 }
 
-export default resolvers;
+export default userResolvers;
