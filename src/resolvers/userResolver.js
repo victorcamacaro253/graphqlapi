@@ -5,12 +5,21 @@ import { randomBytes } from 'crypto';
 
 const userResolvers = {
     Query: {
-        users: async (_,__,{user}) => {
+        getAllusers: async (_,__,{user}) => {
             if(!user){
                 throw new Error('No autenticado')
             }
             return await userModel.getUsers()
         },
+        getFilteredUsers:async (_,{filter})=>{
+            try {
+                const users = await userModel.getUsers(filter)
+                return users
+            } catch (error) {
+                throw new Error('Error fetching filtered users' + error.message)
+            }
+        }
+        ,
         user: async (_, { user_id }) => {
             const user = await userModel.getUserById(user_id);
             if (!user) {
@@ -93,9 +102,32 @@ const userResolvers = {
         user
        }
 
-    }
+    },
+createMultipleUsers: async (_, { users }) => {
+  try {
+    // Hasheamos las contraseñas y asignamos el valor por defecto de 'status' si no se pasa uno
+    const usersWithHashedPasswords = await Promise.all(
+      users.map(async user => {
+        const hashedPassword = await hash(user.password, 10);
+        return {
+          ...user,
+          password: hashedPassword,
+          status: user.status || 'activo' // Asignamos el valor por defecto 'activo' si no se pasa 'status'
+        };
+      })
+    );
 
-    
+    // Ahora insertamos los usuarios con los datos correctamente preparados
+    const result = await userModel.createMultipleUsers(usersWithHashedPasswords);
+
+    return result;
+  } catch (error) {
+    throw new Error('Error creating multiple users: ' + error.message);
+  }
+}
+
+
+
 }
 }
 

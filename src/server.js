@@ -4,9 +4,14 @@ import express from "express";
 import userType from './schema/userType.js';
 import resolvers from './resolvers/index.js';
 import authenticateToken from "./middleware/authenticationToken.js";
-
+import morgan from "morgan";
+import cors from "cors";
 
 const app = express();
+
+app.use(cors())
+
+app.use(morgan('dev'))
 
 const server = new ApolloServer({
     typeDefs: userType,
