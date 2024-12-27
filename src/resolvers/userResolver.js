@@ -18,8 +18,29 @@ const userResolvers = {
             } catch (error) {
                 throw new Error('Error fetching filtered users' + error.message)
             }
-        }
-        ,
+        },
+        getUserByEmail : async (_, {email}) => {
+            try {
+                const user = await userModel.getUserByEmail(email)
+                return user
+                } catch (error) {
+                    throw new Error('Error fetching user by email' + error.message)
+                    }
+                    
+                    },
+        getPaginatedUsers: async (_, {limit=10, page=1}) => {
+            try {
+                // console.log(limit,offset)
+                const offset = (page - 1) * limit; 
+                const users = await userModel.getPaginatedUsers(limit, offset)
+              //  console.log(users)
+                return users
+                } catch (error) {
+                    throw new Error('Error fetching paginated users' + error.message)
+                    }
+                    },
+
+        
         user: async (_, { user_id }) => {
             const user = await userModel.getUserById(user_id);
             if (!user) {

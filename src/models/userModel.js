@@ -71,7 +71,7 @@ class userModel {
 
   static async getUserByEmail(email) {
   try {
-    const [result]= await query('SELECT * FROM users WHERE email = ?', [email]);
+    const result= await query('SELECT * FROM users WHERE email = ?', [email]);
     return result
   } catch (error) {
     throw error
@@ -147,6 +147,21 @@ class userModel {
     }
   }
 
+static async getPaginatedUsers (limit, offset) {
+  console.log(limit,offset)
+  const SQL = `SELECT * FROM users LIMIT ? OFFSET ?`;
+ 
+  try {
+    const results = await query(SQL, [limit, offset]);
+
+    return results;
+  }catch(error){
+    console.error('Error en la consulta SQL:', error);
+    throw new Error('Error getting paginated users: ' + error.message);
+
+  }
+
+}
 }
 
 export default userModel;

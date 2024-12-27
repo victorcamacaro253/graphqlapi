@@ -2,6 +2,7 @@
 import { ApolloServer } from "apollo-server-express";
 import express from "express";
 import userType from './schema/userType.js';
+import productType from "./schema/productType.js";
 import resolvers from './resolvers/index.js';
 import authenticateToken from "./middleware/authenticationToken.js";
 import morgan from "morgan";
@@ -13,8 +14,13 @@ app.use(cors())
 
 app.use(morgan('dev'))
 
+const typeDefs=[
+    userType,
+    productType
+]
+
 const server = new ApolloServer({
-    typeDefs: userType,
+    typeDefs,
     resolvers,
     context: async ({ req }) => {
         const token = req.headers['authorization']?.split(' ')[1]; // El token debe ser 'Bearer <token>'

@@ -10,7 +10,7 @@ const userType = gql`
   }
 
   # Nuevo tipo para la respuesta de login
-  type AuthPayload {
+  type AuthPayload {  
     token: String!    # El token JWT generado
     refreshToken:String
     user: user        # El usuario correspondiente
@@ -24,7 +24,7 @@ const userType = gql`
   role:Int,
   personal_ID:String
   }
-  input UserInput {
+  input UserInput { 
     fullname: String!
     username:String
     email: String!
@@ -38,6 +38,8 @@ const userType = gql`
   type Query {
     getAllusers: [user]
     getFilteredUsers(filter:UserFilterInput): [user]
+    getUserByEmail(email:String) : [user]
+    getPaginatedUsers(limit:Int,offset:Int): [user]
     user(user_id: ID!): user  # Consulta para obtener un usuario por su user_id
   }
 
