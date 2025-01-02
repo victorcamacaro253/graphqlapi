@@ -70,14 +70,45 @@ const productResolver = {
 
 
 
-             /*       updateProduct: async (_, {product_id, name, price, description}) => {
+                    updateProduct: async (_, {product_id, input}) => {
                         try {
-                            const product = await productModel.updateProduct(product_id, name, price, description);
-                            return product;
+                            
+
+                    const updateFields = {}
+
+                    if(input.name) updateFields.name = input.name
+                    if(input.description) updateFields.description = input.description
+                    if(input.price) updateFields.price = input.price
+                    if(input.category_id) updateFields.category_id = input.category_id
+                    if(input.supplier_id) updateFields.supplier_id = input.supplier_id
+
+                    if(input.status) updateFields.status = input.status
+                    
+                    if(Object.keys(updateFields).length === 0){
+                        throw new Error('No fields to update')
+                    }
+
+                    const updateProduct= await productModel.updateProduct(product_id,updateFields)
+                    console.log(updateProduct.product_id)
+
+                    return updateProduct
+
+                   /* if(updateProduct){
+                        const product = await productModel.getProductById(product_id)
+                        return product
+                    }else{
+                        throw new Error('Product not found or change was made')
+                    }*/
+
+
                             } catch (error) {
                                 throw new Error('Error  ' + error.message)
                                 }
+
+
                                 },
+
+
                                 deleteProduct: async (_, {product_id}) => {
                                     try {
                                         const product = await productModel.deleteProduct(product_id);
@@ -86,7 +117,7 @@ const productResolver = {
                                             throw new Error('Error  ' + error.message)
                                             }
                                             }
-                                            */
+                                            
                                             }
                                             
     

@@ -50,6 +50,50 @@ class productModel {
         }
 
 
+        static async updateProduct (product_id,updateFields){
+            try {
+
+                if(Object.keys(updateFields).length ===0){
+                    throw new Error ('No fields provided to update')
+                }
+
+                    const queryStr = "UPDATE products SET ? WHERE product_id = ?";
+
+                    const result = await query(queryStr, [updateFields, product_id]);
+
+                    if(result.affectedRows > 0){
+                        return {product_id,...updateFields}
+                    }else{
+                        throw new Error ('No product found or no  change was made ')
+                    }
+                
+            } catch (error) {
+                throw new Error ('Error updating product' + error.message)
+                
+            }
+            
+        }
+
+        static async deleteProduct(product_id){
+            try {
+
+                const queryStr1 = "DELETE FROM product_stock WHERE product_id = ?";
+                const result1= await query(queryStr1, [product_id]);
+                
+                const queryStr = "DELETE FROM products WHERE product_id = ?";
+                const result = await query(queryStr, [product_id]);
+                if(result.affectedRows > 0){
+                    return {product_id}
+                    }else{
+                        throw new Error ('No product found ')
+                        }
+                        } catch (error) {
+                            throw new Error ('Error deleting product' + error.message)
+                            }
+
+        }
+
+
 }
 
 export default productModel;

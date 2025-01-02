@@ -17,6 +17,16 @@ status: String
     price: Float!
   }
 
+  input ProductUpdateInput{
+  name: String
+  description: String
+  price: Float
+  stock: Int
+  category_id: Int
+  supplier_id: Int
+  status: String
+  }
+
 
 type Query {
  getAllproducts: [Product]
@@ -27,6 +37,8 @@ type Query {
 type Mutation{
 
 createProduct(name:String,description:String,price:Float,category_id:Int,supplier_id: Int,stock:Int) : Product
+updateProduct(product_id:ID!,input:ProductUpdateInput!) : Product
+deleteProduct(product_id:ID!) : Product
 
 }
 
