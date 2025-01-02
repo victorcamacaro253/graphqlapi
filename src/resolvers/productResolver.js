@@ -39,6 +39,19 @@ const productResolver = {
                         throw new Error('Error  ' + error.message)
                     }
                     },
+                    getProductsByCategory: async (_, {category}) => {
+                        try {
+                            const products = await productModel.getProductsByCategory(category);
+                            if (products.length===0){
+                                throw new Error("Product not found");
+                                }
+                                return products;
+                                } catch (error) {
+                                    throw new Error('Error  ' + error.message)
+                                    }
+
+                                }
+
 
     },
     Mutation:{
@@ -46,10 +59,10 @@ const productResolver = {
             try {
 
 
-             //   const existingProduct = await productModel.getProductByName(name)
-              //  if(existingProduct.length>0){
-                //    throw new Error("Product already exists")
-                  //  }
+                const existingProduct = await productModel.getProductByName(name)
+                if(existingProduct.length>0){
+                    throw new Error("Product already exists")
+                    }
 
                 const code = randomBytes(10).toString('hex');
                 const status= 'active'
