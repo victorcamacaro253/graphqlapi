@@ -24,6 +24,14 @@ class productModel {
             return result;
         }
 
+        static async getProductsByCategory(category){
+            const queryStr = "SELECT * FROM product_stock ps JOIN products p ON ps.product_id=p.product_id JOIN categories c ON p.category_id=c.id WHERE c.name = ?";
+            const result = await query(queryStr, [category]);
+            return result;
+
+
+        }
+
         static async createProduct(code,name,price,description,category_id,supplier_id,status){
             const queryStr = "INSERT INTO products SET ?";
             const result = await query(queryStr, [{
@@ -79,7 +87,7 @@ class productModel {
 
                 const queryStr1 = "DELETE FROM product_stock WHERE product_id = ?";
                 const result1= await query(queryStr1, [product_id]);
-                
+
                 const queryStr = "DELETE FROM products WHERE product_id = ?";
                 const result = await query(queryStr, [product_id]);
                 if(result.affectedRows > 0){
@@ -92,6 +100,9 @@ class productModel {
                             }
 
         }
+
+
+
 
 
 }
