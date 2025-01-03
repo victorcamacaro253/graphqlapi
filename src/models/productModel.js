@@ -25,10 +25,17 @@ class productModel {
         }
 
         static async getProductsByCategory(category){
-            const queryStr = "SELECT * FROM product_stock ps JOIN products p ON ps.product_id=p.product_id JOIN categories c ON p.category_id=c.id WHERE c.name = ?";
+            const queryStr = "SELECT p.name,p.product_id,ps.stock,p.price FROM product_stock ps JOIN products p ON ps.product_id=p.product_id JOIN categories c ON p.category_id=c.id WHERE c.name = ?";
             const result = await query(queryStr, [category]);
             return result;
 
+
+        }
+
+        static async getProductsByPriceRange(min,max){
+           const queryStr = "SELECT * FROM product_stock JOIN products ON product_stock.product_id = products.product_id WHERE products.price BETWEEN ? AND ?";
+           const result = await query(queryStr, [min,max]);
+           return result;
 
         }
 
