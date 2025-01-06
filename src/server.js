@@ -3,6 +3,7 @@ import { ApolloServer } from "apollo-server-express";
 import express from "express";
 import userType from './schema/userType.js';
 import productType from "./schema/productType.js";
+import purchaseType from "./schema/purchaseType.js";
 import resolvers from './resolvers/index.js';
 import authenticateToken from "./middleware/authenticationToken.js";
 import morgan from "morgan";
@@ -16,7 +17,8 @@ app.use(morgan('dev'))
 
 const typeDefs=[
     userType,
-    productType
+    productType,
+    purchaseType
 ]
 
 const server = new ApolloServer({
