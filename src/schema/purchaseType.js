@@ -17,18 +17,29 @@ type User {
   email: String
 }
 
+input Productinput{
+product_id:ID!
+quantity:Float!
+price:Float!
+}
+
 type Purchase {
   purchase_id: ID!
-  total_purchase: String!
+  total_purchase: Float!
   date: String!
   user: User!
   products: [Product]
+  message:String
 }
 
 type Query {
   getAllPurchases: [Purchase]
     getPurchaseById(purchase_id: ID!): Purchase
     getPurchasesByUserId(user_id: Int!): [Purchase]
+}
+
+type Mutation{
+ createPurchase(userId:Int!,products:[Productinput!]!):Purchase
 }
 
 

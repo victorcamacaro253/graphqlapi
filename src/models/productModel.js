@@ -39,6 +39,24 @@ class productModel {
 
         }
 
+        static async getProductStock(connection,product_id){
+            const queryStr = "SELECT stock FROM product_stock WHERE product_id=?";
+            const [result] = await connection.query(queryStr, [product_id]);
+            return result[0].stock;
+        }
+
+        static async updateProductStock(connection,product_id,newStock){
+            const queryStr = "UPDATE product_stock SET stock = ? WHERE product_id = ?";
+            const result = await connection.query(queryStr, [newStock,product_id]);
+            return result;
+        }
+
+        static async updateTopSellingProducts(product_id,quantity){
+            const queryStr = "UPDATE most_sold_products SET total_sold = total_sold + ? WHERE product_id = ?"
+            const result = await query(queryStr, [quantity,product_id]);
+
+        }
+
         static async createProduct(code,name,price,description,category_id,supplier_id,status){
             const queryStr = "INSERT INTO products SET ?";
             const result = await query(queryStr, [{
