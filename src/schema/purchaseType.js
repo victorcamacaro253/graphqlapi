@@ -8,6 +8,7 @@ type Product {
   description: String
   price: Float
   amount:Float
+  status: String
 }
 
 type User {
@@ -36,6 +37,8 @@ type Query {
   getAllPurchases: [Purchase]
     getPurchaseById(purchase_id: ID!): Purchase
     getPurchasesByUserId(user_id: Int!): [Purchase]
+    getPurchasesByUsername(username: String!): [Purchase]
+    getPurchasesByDateRange(startDate: String!,endDate: String!): [Purchase]
 }
 
 type Mutation{

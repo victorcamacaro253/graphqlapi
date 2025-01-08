@@ -181,6 +181,136 @@ const purchaseResolver = {
           throw new Error('Error getting purchases by user ID: ' + error.message);
         }
       },
+      
+      getPurchasesByUsername: async(_,{username})=>{
+        try {
+
+          const purchases = await purchaseModel.getPurchaseByUsername(username)
+
+          if (!purchases || purchases.length === 0) {
+            throw new Error(`No purchases found for user ID ${user_id}`);
+          }
+  
+          const groupedPurchases = purchases.reduce((acc, row) => {
+            const {
+              purchase_id,
+              date,
+              total_purchase,
+              user_id,
+              fullname,
+              personal_ID,
+              email,
+              product_id,
+              name,
+              amount,
+              price,
+            } = row;
+  
+            if (!acc[purchase_id]) {
+              acc[purchase_id] = {
+                purchase_id,
+                date,
+                total_purchase,
+                user: {
+                  user_id,
+                  fullname,
+                  personal_ID,
+                  email,
+                },
+                products: [],
+              };
+            }
+  
+            if (product_id && name && price) {
+              acc[purchase_id].products.push({
+                product_id,
+                name,
+                amount,
+                price,
+              });
+            }
+  
+            return acc;
+          }, {});
+  
+          return Object.values(groupedPurchases);
+
+
+      }catch(error){
+        console.error('Error fetching purchases by username:', error);
+          throw new Error('Error getting purchases by username: ' + error.message);
+      }
+    },
+
+    getPurchasesByDateRange: async (_,{startDate,endDate})=>{
+
+      if (!startDate || !endDate) {
+        throw new Error(`No dates provided`);
+          }
+
+     // Formatear las fechas (asegúrate de que el formato sea el correcto según tu base de datos)
+  const formattedStartDate = new Date(startDate);
+  const formattedEndDate = new Date(endDate);
+
+  if (isNaN(formattedStartDate) || isNaN(formattedEndDate)) {
+    throw new Error(`no dates formatted correctly`);
+  }
+
+      try{
+        const purchases = await purchaseModel.getPurchasesByDateRange(formattedStartDate,formattedEndDate)
+
+        if (!purchases || purchases.length === 0) {
+          throw new Error(`No purchases found for user ID ${user_id}`);
+        }
+
+        const groupedPurchases = purchases.reduce((acc, row) => {
+          const {
+            purchase_id,
+            date,
+            total_purchase,
+            user_id,
+            fullname,
+            personal_ID,
+            email,
+            product_id,
+            name,
+            amount,
+            price,
+          } = row;
+
+          if (!acc[purchase_id]) {
+            acc[purchase_id] = {
+              purchase_id,
+              date,
+              total_purchase,
+              user: {
+                user_id,
+                fullname,
+                personal_ID,
+                email,
+              },
+              products: [],
+            };
+          }
+
+          if (product_id && name && price) {
+            acc[purchase_id].products.push({
+              product_id,
+              name,
+              amount,
+              price,
+              
+            });
+          }
+
+          return acc;
+        }, {});
+
+        return Object.values(groupedPurchases);
+    }catch(error){
+      throw new Error ( error.message)
+    }
+  }
 
   },
   Mutation:{
