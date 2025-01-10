@@ -39,10 +39,14 @@ type Query {
     getPurchasesByUserId(user_id: Int!): [Purchase]
     getPurchasesByUsername(username: String!): [Purchase]
     getPurchasesByDateRange(startDate: String!,endDate: String!): [Purchase]
+    getPurchasesByUserDate(user_id:Int!,startDate:String!,endDate:String!) :[Purchase]
 }
 
 type Mutation{
  createPurchase(userId:Int!,products:[Productinput!]!):Purchase
+ updatePurchase(purchase_id:ID!,products:[Productinput!]!):Purchase
+ deletePurchase(purchase_id:ID!): Purchase
+  
 }
 
 

@@ -39,6 +39,8 @@ class productModel {
 
         }
 
+
+       
         static async getProductStock(connection,product_id){
             const queryStr = "SELECT stock FROM product_stock WHERE product_id=?";
             const [result] = await connection.query(queryStr, [product_id]);

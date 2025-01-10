@@ -68,6 +68,13 @@ class purchaseModel{
 
             }
 
+            static async getPurchasedProducts(purchase_id){
+                const querStr= "SELECT * FROM purchased_products WHERE purchase_id=?"
+                const result = await query(querStr, [purchase_id]);
+                return result;
+            }
+    
+
 
       static async createPurchase(connection,userId,total_purchase){
         const [result] = await connection.query('INSERT INTO purchases (user_id,total_purchase,date) VALUES (?,?,NOW())',[userId,total_purchase]); 
@@ -80,6 +87,30 @@ class purchaseModel{
         const result = await connection.query(query, [values]);
         return result;
     }
+
+
+    static async getPurchasesByUserDate(user_id,startDate,endDate){
+        const queryStr = "SELECT * FROM purchased_products pp JOIN purchases p ON pp.purchase_id=p.purchase_id JOIN products sp ON pp.product_id=sp.product_id JOIN  users u ON p.user_id=u.user_id WHERE u.user_id = ? AND p.date BETWEEN ? AND ?";
+        const result = await query(queryStr, [user_id,startDate,endDate]);
+        return result;
+
+
+    }
+
+
+    static async deletePurchase(purchase_id){
+        const queryStr = "DELETE FROM purchases WHERE purchase_id = ?";
+        const result = await query(queryStr, [purchase_id]);
+        return result;
+    }
+
+
+
+    static async deletePurchasedProduct(purchase_id,product_id){
+        const queryStr = "DELETE FROM purchased_products WHERE purchase_id = ? AND product_id = ?";
+        const result = await query(queryStr, [purchase_id,product_id]);
+        return result;
+        }
 }
 
 export default purchaseModel

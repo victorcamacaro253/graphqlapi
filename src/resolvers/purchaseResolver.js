@@ -310,7 +310,66 @@ const purchaseResolver = {
     }catch(error){
       throw new Error ( error.message)
     }
-  }
+  },
+
+  getPurchasesByUserDate: async(_,{user_id,startDate,endDate})=>{
+    try{
+      const purchases= await purchaseModel.getPurchasesByUserDate(user_id,startDate,endDate)
+
+      if (!purchases || purchases.length === 0) {
+        throw new Error(`No purchases found for user ID ${user_id}`);
+      }
+
+      const groupedPurchases = purchases.reduce((acc, row) => {
+        const {
+          purchase_id,
+          date,
+          total_purchase,
+          user_id,
+          fullname,
+          personal_ID,
+          email,
+          product_id,
+          name,
+          amount,
+          price,
+        } = row;
+
+        if (!acc[purchase_id]) {
+          acc[purchase_id] = {
+            purchase_id,
+            date,
+            total_purchase,
+            user: {
+              user_id,
+              fullname,
+              personal_ID,
+              email,
+            },
+            products: [],
+          };
+        }
+
+        if (product_id && name && price) {
+          acc[purchase_id].products.push({
+            product_id,
+            name,
+            amount,
+            price,
+            
+          });
+        }
+
+        return acc;
+      }, {});
+
+      return Object.values(groupedPurchases);
+
+    }catch(error){
+      throw new Error ( error.message)
+
+    }
+  },
 
   },
   Mutation:{
@@ -381,9 +440,56 @@ const purchaseResolver = {
     }finally{
         connection.release()
     }
+},
+deletePurchase: async (_,{purchase_id})=>{
+  console.log(purchase_id)
+    const connection = await pool.getConnection()
+    await connection.beginTransaction(); // Ensure the transaction begins.
+  
+  try{
+
+
+    const purchase = await purchaseModel.getPurchaseById(purchase_id)
+    if(!purchase){
+      console.log(purchase)
+      throw new Error('Purchase not found')
+      }
+      const products = await purchaseModel.getPurchasedProducts(purchase_id)
+      console.log(products)
+      for(const product of products){
+        const {product_id,amount}= product
+        const stock = await productModel.getProductStock(connection,product_id)
+
+        const newStock = stock + amount
+        console.log(newStock)
+        await productModel.updateProductStock(connection,product_id,newStock)
+        const foundProducts= await purchaseModel.deletePurchasedProduct(purchase_id,product_id)
+console.log(foundProducts)
+        if(foundProducts.affectedRows ===0){
+          throw new Error('Error deleting purchased products')
+        }
+
+
+        }
+        const result =await purchaseModel.deletePurchase(purchase_id)
+        if(result.affectedRows ===0){
+          await connection.rollback()
+          throw new Error('Error deleting purchase')
+          }
+
+        await connection.commit()
+        return {message : 'Purchase deleted successfully'}
+}catch(error){
+  await connection.rollback()
+  console.log(error)
+  
+
+}finally{
+  connection.release()
 }
 
   }
-};
+}
+}
 
   export default purchaseResolver
