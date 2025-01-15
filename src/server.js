@@ -5,9 +5,11 @@ import userType from './schema/userType.js';
 import productType from "./schema/productType.js";
 import purchaseType from "./schema/purchaseType.js";
 import resolvers from './resolvers/index.js';
+import categoryType from "./schema/categoryType.js";
 import authenticateToken from "./middleware/authenticationToken.js";
 import morgan from "morgan";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -15,16 +17,19 @@ app.use(cors())
 
 app.use(morgan('dev'))
 
+app.use(cookieParser()); 
+
 const typeDefs=[
     userType,
     productType,
-    purchaseType
+    purchaseType,
+    categoryType
 ]
 
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: async ({ req }) => {
+    context: async ({ req,res }) => {
         const token = req.headers['authorization']?.split(' ')[1]; // El token debe ser 'Bearer <token>'
 
         if (!token) {
@@ -33,7 +38,7 @@ const server = new ApolloServer({
 
         try {
             const user = await authenticateToken(token);
-            return { user }; // Devuelve el usuario decodificado en el contexto
+            return { user,res }; // Devuelve el usuario decodificado en el contexto
         } catch (error) {
             throw new Error('Token no válido');
         }

@@ -71,13 +71,24 @@ class userModel {
 
   static async getUserByEmail(email) {
   try {
-    const result= await query('SELECT * FROM users WHERE email = ?', [email]);
+    const [result]= await query('SELECT * FROM users WHERE email = ?', [email]);
     return result
   } catch (error) {
     throw error
   }  
 }
 
+ static async getUserLoginHistory(user_id){
+  try {
+    const queryStr = `SELECT * FROM login_history lh JOIN users u ON lh.user_id= u.user_id WHERE u.user_id = ? ORDER BY lh.date DESC `;
+    const results = await query(queryStr, [user_id])
+    return results
+    
+  } catch (error) {
+    throw error
+  }
+
+ }
   // Función para crear un nuevo usuario
   static async createUser(fullname,username,email,password,personal_ID,role) {
     try {
@@ -95,7 +106,7 @@ class userModel {
     }
   }
 
-  static async updateUser(id,fullname,username,email){
+  /*static async updateUser(id,fullname,username,email){
     try {
         const results = await query(
             `UPDATE users set fullname=?,username=?,email=? WHERE user_id=?` ,
@@ -107,7 +118,30 @@ class userModel {
         
     }
   }
+*/
+static async updateUser (user_id,updateFields){
+  try {
 
+      if(Object.keys(updateFields).length ===0){
+          throw new Error ('No fields provided to update')
+      }
+
+          const queryStr = "UPDATE users SET ? WHERE user_id = ?";
+
+          const result = await query(queryStr, [updateFields, user_id]);
+
+          if(result.affectedRows > 0){
+              return {user_id,...updateFields}
+          }else{
+              throw new Error ('No product found or no  change was made ')
+          }
+      
+  } catch (error) {
+      throw new Error ('Error updating product' + error.message)
+      
+  }
+  
+}
 
   static async deleteUser(id){
    try {
@@ -162,6 +196,19 @@ static async getPaginatedUsers (limit, offset) {
   }
 
 }
+
+
+static async insertLoginRecord(userId,code){
+  const SQL = `INSERT INTO login_history (user_id, date,code) VALUES (?,NOW(),?)`;
+  try {
+    const result = await query(SQL, [userId, code]);
+    return result;
+    } catch (error) {
+      console.error('Error en la consulta SQL:', error);
+      throw new Error('Error creating login record: ' + error.message);
+      }
+}
+
 }
 
 export default userModel;
