@@ -1,0 +1,126 @@
+import {query} from  './config/db.js';
+
+class rolesPermissionsModel{
+   
+      static  async getAllRoles(){
+            try{
+                const result = await query(`SELECT * FROM roles`)
+                return result
+                }catch(error){
+                    throw new Error(error)
+          }
+
+      }
+
+
+      static async getRoleById(id){
+        try{
+            const result = await query(`SELECT * FROM roles WHERE id = ?`, [id])
+            return result
+            }catch(error){
+                throw new Error(error)
+
+                }
+                
+      }
+
+      static async getRoleByName(name){
+        try{
+            const result = await query(`SELECT * FROM roles WHERE name = ?`, [name])
+            return result
+            }catch(error){
+                throw new Error(error)
+
+                }
+                }
+
+                static async createRole(name,description){
+                    try{
+                        const result = await query('INSERT INTO roles (rol,descripcion,createdAt) VALUES(?,?,NOW())',[ name,description]);
+                        return result
+                        }catch(error){
+                            throw new Error(error)
+                            }
+
+                }
+
+
+               static async updateRole(id,updateFields){
+                try{
+                    const result = await query('UPDATE roles SET ? WHERE id = ?', [updateFields,id])
+                    return result
+                    }catch(error){
+                        throw new Error(error)
+                        }
+                        }
+
+                        static async deleteRole(id){
+                            try{
+                                const result = await query('DELETE FROM roles WHERE id = ?', [id])
+                                return result
+                                }catch(error){
+                                    throw new Error(error)
+                                    }
+                                    
+                        }
+
+
+                        static async getPermissions(){
+                            try{
+                                const result = await query('SELECT * FROM permissions')
+                                return result
+                                }catch(error){
+                                    throw new Error(error)
+                                    }
+
+                        }
+
+
+                        static async getPermissionById(id){
+                            try{
+                                const result = await query('SELECT * FROM permissions WHERE id = ?', [id])
+                                return result
+                                }catch(error){
+                                    throw new Error(error)
+                                    }
+                                    }
+
+
+                                    static async createPermission(name,description){
+                                        try{
+                                            
+
+                                            const result = await query('INSERT INTO permissions (name,description,createdAt) VALUES(?,?,NOW())',[name,description])
+                                            return result
+                                            }catch(error){
+                                                throw new Error(error)
+
+                                                }
+
+                                                }
+
+                                          static async updatePermissions(id,updateFields){
+                                            try{
+                                                const result = await query('UPDATE permissions SET ? WHERE id = ?', [updateFields,id])
+                                                return result
+                                                }catch(error){
+                                                    throw new Error(error)
+                                                    }
+
+                                          }      
+
+                                          static async deletePermission(id){
+                                            try{
+                                                const result = await query('DELETE FROM permissions WHERE id = ?', [id])
+                                                return result
+                                                }catch(error){
+                                                    throw new Error(error)
+                                                    }
+                                                }
+
+
+                                                
+
+    }
+
+    export default rolesPermissionsModel
