@@ -1,4 +1,4 @@
-import {query} from  './config/db.js';
+import {query} from  '../config/db.js';
 
 class rolesPermissionsModel{
    
@@ -118,9 +118,23 @@ class rolesPermissionsModel{
                                                     }
                                                 }
 
+                                                
 
+                                              static async getAllRolesPermissions(){
+                                                try{
+                                                    const sql= `SELECT r.id as Role_id,.r.name as Role ,GROUP_CONCAT(p.name SEPARATOR ', ') as Permissions
+                                                FROM roles_permissions rp JOIN roles r ON rp.role_id=r.id JOIN permissions p ON rp.permission_id=p.id
+                                                GROUP BY r.id, r.name ORDER BY r.id`
+
+                                             const result = await query(sql)
+                     return result
+                     }catch(error){
+                        throw new Error(error)
+
+                            }  
                                                 
 
     }
+}
 
     export default rolesPermissionsModel
