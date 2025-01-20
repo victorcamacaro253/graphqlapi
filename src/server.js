@@ -6,6 +6,7 @@ import productType from "./schema/productType.js";
 import purchaseType from "./schema/purchaseType.js";
 import resolvers from './resolvers/index.js';
 import categoryType from "./schema/categoryType.js";
+import rolesPermissionType from "./schema/rolesPermissionType.js";
 import authenticateToken from "./middleware/authenticationToken.js";
 import morgan from "morgan";
 import cors from "cors";
@@ -23,7 +24,9 @@ const typeDefs=[
     userType,
     productType,
     purchaseType,
-    categoryType
+    categoryType,
+    rolesPermissionType,
+
 ]
 
 const server = new ApolloServer({
