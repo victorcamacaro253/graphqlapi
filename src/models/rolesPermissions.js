@@ -15,7 +15,7 @@ class rolesPermissionsModel{
 
       static async getRoleById(id){
         try{
-            const result = await query(`SELECT * FROM roles WHERE id = ?`, [id])
+            const [result] = await query(`SELECT * FROM roles WHERE id = ?`, [id])
             return result
             }catch(error){
                 throw new Error(error)
@@ -26,7 +26,7 @@ class rolesPermissionsModel{
 
       static async getRoleByName(name){
         try{
-            const result = await query(`SELECT * FROM roles WHERE name = ?`, [name])
+            const [result] = await query(`SELECT * FROM roles WHERE name = ?`, [name])
             return result
             }catch(error){
                 throw new Error(error)
@@ -65,7 +65,7 @@ class rolesPermissionsModel{
                         }
 
 
-                        static async getPermissions(){
+                        static async getAllPermissions(){
                             try{
                                 const result = await query('SELECT * FROM permissions')
                                 return result
