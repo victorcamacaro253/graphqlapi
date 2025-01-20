@@ -40,7 +40,7 @@ rolesPermissions : [RolePermissions]
 type Mutation {
  createRole(name:String!,description: String): Role
  updateRole(id:Int!,name: String,description:String): Role
- deleteRole(id:int) : Role
+ deleteRole(id:Int) : Role
 
  createPermission(name:String,description:String) : Role
  updatePermission(id:Int!,name:String,description:String): Role
