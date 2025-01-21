@@ -7,8 +7,14 @@ const productResolver = {
     
     Query:{
         getAllproducts: async () => {
+            try{
             const products = await productModel.getAllProducts();
+            console.log(products)
             return products;
+            }catch(err){
+                console.log(err);
+                return err;
+                }
             },
             getProductById: async (_, {product_id}) => {
                 try {

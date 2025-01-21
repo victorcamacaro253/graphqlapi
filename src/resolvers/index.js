@@ -3,6 +3,7 @@ import productResolver from './productResolver.js';
 import purchaseResolver from './purchaseResolver.js';
 import categoryResolver from './categoryResolver.js';
 import rolesPermissions from './rolesPermissions.js';
+import authResolver from './authResolver.js';
 
 const resolvers = {
     Query:{
@@ -10,14 +11,16 @@ const resolvers = {
         ...productResolver.Query,
         ...purchaseResolver.Query,
         ...categoryResolver.Query,
-        ...rolesPermissions.Query
+        ...rolesPermissions.Query,
+        ...authResolver.Query
     },
     Mutation:{
         ...userResolvers.Mutation,
         ...productResolver.Mutation,
         ...purchaseResolver.Mutation,
         ...categoryResolver.Mutation,
-        ...rolesPermissions.Mutation
+        ...rolesPermissions.Mutation,
+        ...authResolver.Mutation
     }
 }
 export default resolvers

@@ -36,11 +36,11 @@ input UpdateUserInput {
   usuario: loginHistory
 }
 
-  # Nuevo tipo para la respuesta de login
+ 
   type AuthPayload {  
-    token: String!    # El token JWT generado
+    token: String    
     refreshToken:String
-    user: user        # El usuario correspondiente
+    user: user        
 
    
   }
@@ -77,7 +77,8 @@ input UpdateUserInput {
     createMultipleUsers(users:[UserInput]!): Int
     updateUser(user_id: ID!, input: UpdateUserInput!): user
     deleteUser(user_id:ID!) : Boolean
-    login(email:String!,password:String!): AuthPayload 
+     
+
   }
 `;
 

@@ -7,6 +7,7 @@ import purchaseType from "./schema/purchaseType.js";
 import resolvers from './resolvers/index.js';
 import categoryType from "./schema/categoryType.js";
 import rolesPermissionType from "./schema/rolesPermissionType.js";
+import authenticationType from "./schema/authenticationType.js";
 import authenticateToken from "./middleware/authenticationToken.js";
 import morgan from "morgan";
 import cors from "cors";
@@ -26,6 +27,7 @@ const typeDefs=[
     purchaseType,
     categoryType,
     rolesPermissionType,
+    authenticationType
 
 ]
 

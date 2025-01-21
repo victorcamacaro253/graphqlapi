@@ -6,10 +6,10 @@ import tokenModel from '../models/tokenModel.js';
 
 const userResolvers = {
     Query: {
-        getAllusers: async (_,__,{user}) => {
-            if(!user){
+        getAllusers: async () => {
+           /* if(!user){
                 throw new Error('No authenticated')
-            }
+            }*/
             return await userModel.getUsers()
         },
         getFilteredUsers:async (_,{filter})=>{
@@ -144,7 +144,7 @@ const userResolvers = {
 
                 
           
-        },
+        
 
     deleteUser : async (_,{user_id})=>{
         try {
@@ -158,8 +158,8 @@ const userResolvers = {
 
     },
 
-    login :async (_,{email,password},{res})=>{
-
+  /*  login :async (_,{email,password},{res})=>{
+    console.log(email,password)
         const user = await userModel.getUserByEmail(email)
         console.log(user)
         if(!user){
@@ -184,12 +184,12 @@ const userResolvers = {
        const saveRefreshToken = await tokenModel.saveRefreshToken( user.user_id,refreshToken, expiresAt);
 
         // Configurar el refresh token como una cookie
-      /*  res.cookie('refreshToken', refreshToken, {
+       res.cookie('refreshToken', refreshToken, {
             httpOnly: true, // No accesible por JavaScript en el navegador
             secure: process.env.NODE_ENV === 'production', // Solo en producción
             sameSite: 'Strict', // Protección contra CSRF
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días en milisegundos
-        });*/
+        });
 
 
          // Generar un código aleatorio
@@ -204,7 +204,7 @@ const userResolvers = {
         user
        }
 
-    },
+    },*/
 createMultipleUsers: async (_, { users }) => {
   try {
     // Hasheamos las contraseñas y asignamos el valor por defecto de 'status' si no se pasa uno
@@ -226,10 +226,66 @@ createMultipleUsers: async (_, { users }) => {
   } catch (error) {
     throw new Error('Error creating multiple users: ' + error.message);
   }
+},
+
+/*
+loginUser: async(_,{email,password},{res})=>{
+    
+    try{
+        console.log('victor',email,password)
+    const user = await userModel.getUserByEmail(email)
+    console.log(user)
+    if(!user){
+        throw new Error('User not found')
+    }
+    
+
+    const isMatch = await compare(password,user.password)
+    
+    if(!isMatch){
+        throw new Error('Invalid password')
+    }
+
+    
+   const token= tokenService.generateToken(user.user_id,user.email,user.role,'1h')
+   
+  const refreshToken = tokenService.generateToken(user.user_id,user.email,user.role,'7d')
+
+
+   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);  // Expira en 7 días
+
+   const saveRefreshToken = await tokenModel.saveRefreshToken( user.user_id,refreshToken, expiresAt);
+
+    // Configurar el refresh token como una cookie
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true, // No accesible por JavaScript en el navegador
+        secure: process.env.NODE_ENV === 'production', // Solo en producción
+        sameSite: 'Strict', // Protección contra CSRF
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días en milisegundos
+    });
+
+
+     // Generar un código aleatorio
+     const randomCode = randomBytes(8).toString('hex'); // Genera un código aleatorio de 8 caracteres
+
+     // Insertar registro de inicio de sesión en la base de datos
+     userModel.insertLoginRecord(user.user_id, randomCode)
+
+   return {
+    token,
+   refreshToken,
+    user
+   }
+}catch(error){
+    console.log(error)
+    throw new Error('Invalid credentials')
 }
 
+}
 
+*/
 
+    }
 }
 
 
