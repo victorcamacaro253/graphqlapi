@@ -12,14 +12,28 @@ import authenticateToken from "./middleware/authenticationToken.js";
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import limiter from "./middleware/rateLimiter.js";
+import upload from "./middleware/multer.js";
 
-const app = express();
+import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 
-app.use(cors())
+const app = express();  
+
+app.use(cors({
+    origin: 'http://localhost:5173',  // El origen de tu frontend
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    credentials: true,  // Para permitir el manejo de cookies, si es necesario
+  }));
+  
 
 app.use(morgan('dev'))
 
 app.use(cookieParser()); 
+
+app.use(limiter)
+
+//app.use(graphqlUploadExpress());
 
 const typeDefs=[
     userType,
@@ -50,6 +64,21 @@ const server = new ApolloServer({
     }
     
 });
+
+app.post('/upload', upload.single('image'), (req, res) => {
+    if (!req.file) {
+      return res.status(400).send({ message: 'No file uploaded' });
+    }
+  
+     // Construct the relative path for the uploaded image
+  const filePath = `/uploads/${req.file.filename}`;
+  res.status(200).send({ filePath });  // Return only the relative file path
+
+  });
+
+  // Serve static files from the 'uploads' directory
+app.use('/uploads', express.static('uploads'));
+
 
 // Función asíncrona para iniciar el servidor
 const startServer = async () => {
