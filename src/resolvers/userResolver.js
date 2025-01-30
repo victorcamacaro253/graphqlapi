@@ -1,8 +1,13 @@
 import userModel from '../models/userModel.js'
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 import {hash,compare} from 'bcrypt'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url';
 import tokenService from '../services/tokenService.js';
 import { randomBytes } from 'crypto';
 import tokenModel from '../models/tokenModel.js';
+import Upload from 'graphql-upload/Upload.mjs';
 
 const userResolvers = {
     Query: {
@@ -81,28 +86,52 @@ const userResolvers = {
                 },
                 
     },
+    Upload:GraphQLUpload,
     Mutation: {
-        createUser:  async (_, { fullname,username, email, password,personal_ID,role }) => {
+        createUser:  async (_, { fullname,username, email, password,personal_ID,role,image }) => {
+            console.log(image,fullname)
 
              try {
-                const existingUser= await userModel.getUserByPersonalID(personal_ID)
 
-                if (existingUser) {
-                    throw new Error('User with the provided email or username already exists');
-                  }
+              
+          
 
-                  if (password.length < 7) {
-                    throw new Error( 'La contraseña debe tener al menos 7 caracteres' );
-                }
-            
-            const hashedPassword =await  hash(password,10)
-                  
-            return userModel.createUser(fullname,username, email, hashedPassword,personal_ID,role);
+
+
+
                 
-             } catch (error) {
-                throw new Error('Error inserting user:'+ error.message)
-             }
 
+        
+                    try{
+
+                        const existingUser= await userModel.getUserByPersonalID(personal_ID)
+
+                        if (existingUser) {
+                            throw new Error('User with the provided email or username already exists');
+                          }
+        
+                          if (password.length < 7) {
+                            throw new Error( 'La contraseña debe tener al menos 7 caracteres' );
+                        }
+
+                        const hashedPassword = await hash(password,10)
+
+                        const newUser =  await userModel.createUser(fullname,username, email, hashedPassword,personal_ID,role,image)
+
+                        return newUser
+                    }catch(error){
+                        console.log(error)
+                        throw new Error(`Error creating user: ${error.message}`);
+                    }
+                
+                } catch (error) {
+                    console.log(error)
+                    throw new Error(`Error uploading image: ${error.message}`);
+                    }
+
+            
+                
+           
         },
 
         updateUser:async (_,{user_id,input})=>{
