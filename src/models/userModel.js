@@ -90,11 +90,11 @@ class userModel {
 
  }
   // Función para crear un nuevo usuario
-  static async createUser(fullname,username,email,password,personal_ID,role) {
+  static async createUser(fullname,username,email,password,personal_ID,role,image) {
     try {
       const results = await query(
-        'INSERT INTO users (fullname,username, email,password,personal_ID,role) VALUES (?,?,?,?,?,?)',
-        [fullname,username,email,password,personal_ID,role]
+        'INSERT INTO users (fullname,username, email,password,personal_ID,role,image) VALUES (?,?,?,?,?,?,?)',
+        [fullname,username,email,password,personal_ID,role,image]
       );
       return {
         id: results.insertId,
