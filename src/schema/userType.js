@@ -1,6 +1,9 @@
 import { gql } from 'apollo-server-express';
 
+
 const userType = gql`
+  scalar Upload
+
   type user {
     user_id: ID!         # El campo user_id es obligatorio (non-nullable)
     fullname: String
@@ -8,6 +11,7 @@ const userType = gql`
     email: String,
     personal_ID:String
     createdAt:String
+    image: String
   }
     # Input Type for Update User
 input UpdateUserInput {
@@ -73,7 +77,7 @@ input UpdateUserInput {
   }
 
   type Mutation {
-    createUser(fullname: String!,username:String, email: String,password:String,personal_ID:String,role:Int): user  # Mutación para crear un usuario
+    createUser(fullname: String!,username:String, email: String,password:String,personal_ID:String,role:Int,image:String): user  # Mutación para crear un usuario
     createMultipleUsers(users:[UserInput]!): Int
     updateUser(user_id: ID!, input: UpdateUserInput!): user
     deleteUser(user_id:ID!) : Boolean

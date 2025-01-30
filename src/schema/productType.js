@@ -9,6 +9,7 @@ price: Float!
 stock : Int!
 category_id : Int
 supplier_id: Int 
+image:String
 status: String
 }
 
