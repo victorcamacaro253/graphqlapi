@@ -14,90 +14,99 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import limiter from "./middleware/rateLimiter.js";
 import upload from "./middleware/multer.js";
-
+import csrf from "./middleware/csrfToken.js";  // Import CSRF middleware
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 
-const app = express();  
+const app = express();
 
+
+
+
+
+
+
+// Enable CORS with proper settings
 app.use(cors({
-    origin: 'http://localhost:5173',  // El origen de tu frontend
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    credentials: true,  // Para permitir el manejo de cookies, si es necesario
-  }));
-  
+    origin: 'http://localhost:5173', // Your frontend URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE','OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-CSRF-TOKEN'],
+    credentials: true, // Allow cookies to be sent
+}));
 
-app.use(morgan('dev'))
+app.use(morgan('dev'));
+app.use(cookieParser()); // Cookie parser to read cookies
 
-app.use(cookieParser()); 
+// Rate limiter
+app.use(limiter);
 
-app.use(limiter)
 
-//app.use(graphqlUploadExpress());
 
-const typeDefs=[
+// Serve the CSRF token route
+app.get('/csrf-token', csrf.setCsrfToken); // This will set the CSRF token for the frontend
+
+
+//app.use(csrf.csrfMiddleware);  // Apply CSRF protection middleware to all requests
+
+const typeDefs = [
     userType,
     productType,
     purchaseType,
     categoryType,
     rolesPermissionType,
     authenticationType
+];
 
-]
-
+// Apollo Server setup
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: async ({ req,res }) => {
-        const token = req.headers['authorization']?.split(' ')[1]; // El token debe ser 'Bearer <token>'
+    context: async ({ req, res }) => {
+        const token = req.headers['authorization']?.split(' ')[1]; // Expecting 'Bearer <token>'
 
         if (!token) {
-            return {};  // No hay token, devolvemos un contexto vacío (puede ser útil para acceso público)
+            return {}; // No token, return an empty context (useful for public access)
         }
 
         try {
-            const user = await authenticateToken(token);
-            return { user,res }; // Devuelve el usuario decodificado en el contexto
+            const user = await authenticateToken(token);  // Your JWT authentication logic
+            return { user, res }; // Return user in context
         } catch (error) {
-            throw new Error('Token no válido');
+            throw new Error('Invalid token');
         }
     }
-    
 });
 
+// Handling file uploads
 app.post('/upload', upload.single('image'), (req, res) => {
     if (!req.file) {
-      return res.status(400).send({ message: 'No file uploaded' });
+        return res.status(400).send({ message: 'No file uploaded' });
     }
-  
-     // Construct the relative path for the uploaded image
-  const filePath = `/uploads/${req.file.filename}`;
-  res.status(200).send({ filePath });  // Return only the relative file path
 
-  });
+    // Construct the relative path for the uploaded image
+    const filePath = `/uploads/${req.file.filename}`;
+    res.status(200).send({ filePath }); // Return only the relative file path
+});
 
-  // Serve static files from the 'uploads' directory
+// Serve static files (uploaded images)
 app.use('/uploads', express.static('uploads'));
 
-
-// Función asíncrona para iniciar el servidor
+// Start the Apollo Server
 const startServer = async () => {
-    // Inicia el servidor Apollo
-    await server.start();
+    await server.start();  // Start Apollo server
 
-    // Aplica middleware de Apollo a la aplicación Express
+    // Apply Apollo middleware after CSRF middleware
     server.applyMiddleware({ app, path: '/graphql' });
 
-    // Inicia el servidor Express
+    // Start the Express server
     const PORT = process.env.PORT || 4001;
     app.listen(PORT, () => {
-        console.log(`🚀Servidor corriendo en http://localhost:${PORT}${server.graphqlPath}`);
+        console.log(`🚀 Server running at http://localhost:${PORT}${server.graphqlPath}`);
     });
 };
 
-// Llama a la función para iniciar el servidor
+// Call startServer function
 startServer().catch(err => {
-    console.error('Error al iniciar el servidor:', err);
+    console.error('Error starting the server:', err);
 });
 
 export default app;
