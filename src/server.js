@@ -9,6 +9,7 @@ import categoryType from "./schema/categoryType.js";
 import rolesPermissionType from "./schema/rolesPermissionType.js";
 import authenticationType from "./schema/authenticationType.js";
 import authenticateToken from "./middleware/authenticationToken.js";
+import exportType from "./schema/exportType.js";
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -53,7 +54,8 @@ const typeDefs = [
     purchaseType,
     categoryType,
     rolesPermissionType,
-    authenticationType
+    authenticationType,
+    exportType,
 ];
 
 // Apollo Server setup
