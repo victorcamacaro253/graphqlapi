@@ -5,17 +5,27 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import tokenService from '../services/tokenService.js';
-import { randomBytes } from 'crypto';
-import tokenModel from '../models/tokenModel.js';
-import Upload from 'graphql-upload/Upload.mjs';
+import checkPermission from '../middleware/checkAccess.js';
+import sendEmail from '../services/emailService.js';
+import XLSX from 'xlsx';
+
+
 
 const userResolvers = {
     Query: {
-        getAllusers: async () => {
-           /* if(!user){
-                throw new Error('No authenticated')
-            }*/
-            return await userModel.getUsers()
+        getAllusers: async (_, __, context) => {
+            // Check if user is authenticated
+            const { user } = context;
+            if (!user) {
+                throw new Error('Not authenticated');
+            }
+            console.log(user)
+
+            // Check if the user has permission to view users
+            await checkPermission('read')(context);
+
+            // If authenticated and has permission, fetch users
+            return await userModel.getUsers();
         },
         getFilteredUsers:async (_,{filter})=>{
             try {
@@ -92,15 +102,6 @@ const userResolvers = {
             console.log(image,fullname)
 
              try {
-
-              
-          
-
-
-
-
-                
-
         
                     try{
 
@@ -117,7 +118,7 @@ const userResolvers = {
                         const hashedPassword = await hash(password,10)
 
                         const newUser =  await userModel.createUser(fullname,username, email, hashedPassword,personal_ID,role,image)
-
+                       console.log(newUser)
                         return newUser
                     }catch(error){
                         console.log(error)
@@ -256,6 +257,93 @@ createMultipleUsers: async (_, { users }) => {
     throw new Error('Error creating multiple users: ' + error.message);
   }
 },
+
+  requestPasswordReset : async (_,{email})=>{
+    try{
+        const user = await userModel.findUserByEmail(email);
+        if(!user){
+            throw new Error('User not found')
+            }
+            
+            
+  const token = tokenService.generateToken(user.user_id,user.email,user.role,'1h')
+
+  const emailSent = await sendEmail(email,'Password Reset',`You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
+              `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
+              `http://localhost:3001/resetPassword/${token}\n\n` +
+              `If you did not request this, please ignore this email.\n`)
+   
+
+              if (!emailSent) {
+                throw new Error('Error sending email')      
+                  }
+    
+            return {
+                message: ' Email sent successfully',
+            }
+
+  }catch(error){
+    throw new Error('Error sending password reset email: ' + error.message);
+  }
+},
+
+resetPassword: async (_,{token,newPassword})=>{
+    try{
+        const userId = tokenService.verifyToken(token)
+
+        if(!userId){
+            throw new Error('Invalid token')
+        }
+
+       const hashedPassword = await hash(newPassword,10)
+       
+       await userModel.updateUser(userId,hashedPassword)
+
+       await userModel.deleteResetToken(userId)
+
+       return  {
+        message: 'Password reset successfully',
+       }
+}catch(error){
+    throw new Error('Error resetting password: ' + error.message);
+}
+
+},
+
+/*
+exportUsersToExcel : async () =>{
+    try {
+        const users = await userModel.getUsers()
+
+      //  console.log(users)
+
+       // Check if users exist, if not, throw an error
+       if (!users || users.length === 0) {
+        throw new Error('No users found to export');
+    }
+
+
+        const workbook = XLSX.utils.book_new()
+        const worksheet = XLSX.utils.json_to_sheet(users)
+
+        XLSX.utils.book_append_sheet(workbook,worksheet,'Users')
+        const buffer = XLSX.write(workbook,{bookType:'xlsx',type:'buffer'})
+
+        const filename = `users_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+        // Return the buffer and filename
+        return {
+            filename,
+            buffer: buffer.toString('base64'), // Convert buffer to base64 for transmission
+        };
+
+    } catch (error) {
+        throw new Error('Error exporting users to excel: ' + error.message);
+        
+    }
+    }
+    
+*/
 
 /*
 loginUser: async(_,{email,password},{res})=>{

@@ -4,6 +4,7 @@ import purchaseResolver from './purchaseResolver.js';
 import categoryResolver from './categoryResolver.js';
 import rolesPermissions from './rolesPermissions.js';
 import authResolver from './authResolver.js';
+import exportResolver from './exportResolver.js';
 
 const resolvers = {
     Query:{
@@ -12,7 +13,8 @@ const resolvers = {
         ...purchaseResolver.Query,
         ...categoryResolver.Query,
         ...rolesPermissions.Query,
-        ...authResolver.Query
+        ...authResolver.Query,
+        ...exportResolver.Query,
     },
     Mutation:{
         ...userResolvers.Mutation,
@@ -20,7 +22,8 @@ const resolvers = {
         ...purchaseResolver.Mutation,
         ...categoryResolver.Mutation,
         ...rolesPermissions.Mutation,
-        ...authResolver.Mutation
+        ...authResolver.Mutation,
+        ...exportResolver.Mutation
     }
 }
 export default resolvers
