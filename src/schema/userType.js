@@ -66,6 +66,13 @@ input UpdateUserInput {
     status: String  # status es opcional
   }
 
+   # Input type for password reset
+  input ResetPasswordInput {
+    token: String!
+    newPassword: String!
+  }
+
+  
 
   type Query {
     getAllusers: [user]
@@ -81,6 +88,9 @@ input UpdateUserInput {
     createMultipleUsers(users:[UserInput]!): Int
     updateUser(user_id: ID!, input: UpdateUserInput!): user
     deleteUser(user_id:ID!) : Boolean
+    requestPasswordReset(email: String!): String  # Mutation for requesting password reset
+    resetPassword(input: ResetPasswordInput!): String  # Mutation for resetting password
+    
      
 
   }
