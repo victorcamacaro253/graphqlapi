@@ -24,6 +24,22 @@ class rolesPermissionsModel{
                 
       }
 
+      static async getPermissionsByRoleId(roleId) {
+        try {
+            const sql = `
+                SELECT p.id, p.name, p.description
+                FROM permissions p
+                JOIN roles_permissions rp ON rp.permission_id = p.id
+                WHERE rp.role_id = ?
+            `;
+            const result = await query(sql, [roleId]);
+            return result;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+    
+
       static async getRoleByName(name){
         try{
             const [result] = await query(`SELECT * FROM roles WHERE name = ?`, [name])
