@@ -39,6 +39,25 @@ class productModel {
 
         }
 
+        static async getProductMetaData(){
+            const queryStr="SELECT (SELECT COUNT(*) FROM products) AS totalProducts, MIN(price) AS minPrice, MAX(price) AS maxPrice, category_id, COUNT(*) AS categoryCount FROM  products GROUP BY  category_id; "
+            const results = await query(queryStr);
+
+            const categoryCounts = {};
+            
+            results.forEach(row=>{
+                categoryCounts[row.category_id] = row.categoryCount;
+            })
+
+            return {
+                totalProducts: results[0].totalProducts,
+                minPrice: results[0].minPrice,
+                maxPrice: results[0].maxPrice,
+                categoryCounts:categoryCounts
+            }
+
+        }
+
 
        
         static async getProductStock(connection,product_id){
@@ -59,7 +78,7 @@ class productModel {
 
         }
 
-        static async createProduct(code,name,price,description,category_id,supplier_id,status){
+        static async createProduct(code,name,price,description,category_id,supplier_id,image,status){
             const queryStr = "INSERT INTO products SET ?";
             const result = await query(queryStr, [{
                 code:code,
@@ -68,6 +87,7 @@ class productModel {
                 description:description,
                 category_id:category_id,
                 supplier_id:supplier_id,
+                image:image,
                 status:status
                 }]);
                 return result;
