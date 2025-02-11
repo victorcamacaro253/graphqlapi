@@ -38,6 +38,10 @@ const userResolvers = {
         getUserByEmail : async (_, {email}) => {
             try {
                 const user = await userModel.getUserByEmail(email)
+
+                if(!user){
+                    throw new Error('User not found')
+                }
                 return user
                 } catch (error) {
                     throw new Error('Error fetching user by email' + error.message)
@@ -101,7 +105,7 @@ const userResolvers = {
         createUser:  async (_, { fullname,username, email, password,personal_ID,role,image }) => {
             console.log(image,fullname)
 
-             try {
+            
         
                     try{
 
@@ -125,11 +129,6 @@ const userResolvers = {
                         throw new Error(`Error creating user: ${error.message}`);
                     }
                 
-                } catch (error) {
-                    console.log(error)
-                    throw new Error(`Error uploading image: ${error.message}`);
-                    }
-
             
                 
            
@@ -268,9 +267,11 @@ createMultipleUsers: async (_, { users }) => {
             
   const token = tokenService.generateToken(user.user_id,user.email,user.role,'1h')
 
+  const resetPasswordUrl = process.env.RESET_PASSWORD_URL || `http://localhost:3001/resetPassword/${token}`;
+
   const emailSent = await sendEmail(email,'Password Reset',`You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
               `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
-              `http://localhost:3001/resetPassword/${token}\n\n` +
+              `${resetPasswordUrl}\n\n` +
               `If you did not request this, please ignore this email.\n`)
    
 

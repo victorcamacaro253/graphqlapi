@@ -70,11 +70,11 @@ const productResolver = {
                                                 }
                                             },
 
-                                            getProductsMeta: async ()=>{
+                                         /*   getProductsMeta: async ()=>{
                                                 try {
                                                     const products = await productModel.getAllProducts();
                                                     console.log(products.length)
-                                                    const categories = await categoryModel.getCategories()
+                                                    const categories = await categoryModel.getAllCategories()
 
                                                         const meta ={
                                                             totalProducts: products.length,
@@ -100,29 +100,86 @@ const productResolver = {
                                                 throw new Error('Error fetching product')
 
                                             }
+                                        },*/
+                                        getProductsMeta: async () => {
+                                            try {
+                                                // Query to get the total number of products, price range, and category counts in a single query.
+                                                const productMeta = await productModel.getProductMetaData();
+                                        
+                                                // Assuming your model is set up to aggregate data like this:
+                                                // 1. Total number of products
+                                                // 2. Price range (min, max)
+                                                // 3. Count by category
+                                                const { totalProducts, minPrice, maxPrice, categoryCounts } = productMeta;
+                                        
+                                                // Fetch the category names to include in the response
+                                                const categories = await categoryModel.getAllCategories();
+                                        
+                                                // Prepare the response
+                                                const meta = {
+                                                    totalProducts,
+                                                    priceRange: {
+                                                        min: minPrice,
+                                                        max: maxPrice
+                                                    },
+                                                    categories: categories.map(category => category.name),
+                                                    countByCategory: categories.map(category => {
+                                                        const count = categoryCounts[category.id] || 0;
+                                                        return {
+                                                            category: category.name,
+                                                            count: count
+                                                        };
+                                                    })
+                                                };
+                                        
+                                                return meta;
+                                            } catch (error) {
+                                                console.error(error);
+                                                throw new Error('Error fetching product metadata: ' + error.message);
+                                            }
                                         },
+                                        
 
 
     },
     Mutation:{
-        createProduct:async (_, {name,price,description,category_id,supplier_id,stock}) => {
+        createProduct:async (_, {name,price,description,category_id,supplier_id,stock,image}) => {
+            console.log(name,price,description,category_id,supplier_id,stock,image)
             try {
 
 
                 const existingProduct = await productModel.getProductByName(name)
+                console.log(existingProduct)
                 if(existingProduct.length>0){
                     throw new Error("Product already exists")
                     }
 
+                if (price <= 0) {
+                     throw new Error("Price must be a positive number");
+
+                 }
+
+                 if (!name || name.trim().length === 0) {
+                    throw new Error("Product name cannot be empty");
+                }
+
                 const code = randomBytes(10).toString('hex');
                 const status= 'active'
-                const product = await productModel.createProduct(code,name,price,description,category_id,supplier_id,status);
+                const product = await productModel.createProduct(code,name,price,description,category_id,supplier_id,image,status);
                console.log(product.insertId)
 
                 const product_stock= await productModel.createProductStock(product.insertId,stock)
 
-                  return product
-        return product
+                //  const productId=   product.insertId
+
+              //    const createdProduct = await productModel.getProductById(productId); // Assuming you have this method
+                //  console.log("Created Product:", createdProduct);
+      
+                 // return createdProduct;
+       
+                 return {product,
+                    name
+                 }
 
                 } catch (error) {
 
@@ -186,12 +243,19 @@ const productResolver = {
                                             try {
                                                 const createdProducts=[]
 
+                                                const existingProducts = await productModel.getAllProducts()
+                                                const existingProductName= new Set(existingProducts.map(p => p.name))
+
                                                 for(const product of products){
 
-                                                    const existingProduct = await productModel.getProductByName(product.name)
+                                                    /*const existingProduct = await productModel.getProductByName(product.name)
                                                     if(existingProduct.length > 0){
                                                         throw new Error('Product already exists')
-                                                    }
+                                                    }*/
+
+                                                        if(existingProductName.has(product.name)){
+                                                            throw new Error('Product already exists')
+                                                        }
 
                                                     const code = randomBytes(10).toString('hex')
                                                     const status= 'active'
