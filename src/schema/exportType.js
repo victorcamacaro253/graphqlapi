@@ -11,7 +11,9 @@ type ExportResponse {
 
 type Mutation {
     exportUsersToExcel: ExportResponse
-     
+     exportUserToExcel(id:String!):ExportResponse 
+     exportUsersToPdf: ExportResponse
+    exportUserToPdf(id: String!): ExportResponse
 
   }
 

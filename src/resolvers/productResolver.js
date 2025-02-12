@@ -202,6 +202,10 @@ const productResolver = {
                     if(input.category_id) updateFields.category_id = input.category_id
                     if(input.supplier_id) updateFields.supplier_id = input.supplier_id
 
+                    if(input.status && !['active', 'inactive'].includes(input.status)){
+                        throw new Error('Invalid status value');
+                    }
+
                     if(input.status) updateFields.status = input.status
                     
                     if(Object.keys(updateFields).length === 0){

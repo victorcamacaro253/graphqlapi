@@ -63,7 +63,7 @@ type Query {
 
 type Mutation{
 
-createProduct(name:String,description:String,price:Float,category_id:Int,supplier_id: Int,stock:Int) : Product
+createProduct(name:String,description:String,price:Float,category_id:Int,supplier_id: Int,image:String,stock:Int) : Product
 updateProduct(product_id:ID!,input:ProductUpdateInput!) : Product
 deleteProduct(product_id:ID!) : Product
 

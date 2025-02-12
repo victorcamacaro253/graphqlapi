@@ -24,6 +24,8 @@ quantity:Float!
 price:Float!
 }
 
+
+
 type Purchase {
   purchase_id: ID!
   total_purchase: Float!
@@ -33,10 +35,15 @@ type Purchase {
   message:String
 }
 
+type UserPurchases {
+  user: User
+  purchases: [Purchase]
+}
+
 type Query {
   getAllPurchases: [Purchase]
     getPurchaseById(purchase_id: ID!): Purchase
-    getPurchasesByUserId(user_id: Int!): [Purchase]
+    getPurchasesByUserId(user_id: Int!): UserPurchases
     getPurchasesByUsername(username: String!): [Purchase]
     getPurchasesByDateRange(startDate: String!,endDate: String!): [Purchase]
     getPurchasesByUserDate(user_id:Int!,startDate:String!,endDate:String!) :[Purchase]

@@ -1,68 +1,22 @@
 import purchaseModel from "../models/purchaseModel.js";
 import productModel from "../models/productModel.js";
 import { pool } from "../config/db.js";
+import { groupPurchases,groupPurchase,groupPurchasesByUser } from '../utils/groupPurchases.js';
 
 
 const purchaseResolver = {
     Query: {
       getAllPurchases: async () => {
         try {
-          // Fetch all purchase data (including user data)
           const purchases = await purchaseModel.getAllPurchases();
           console.log('Purchases data:', purchases);
   
-          // Group the purchases by purchase_id
-          const groupPurchases = purchases.reduce((acc, row) => {
-            const {
-              purchase_id,
-              date,
-              total_purchase,
-              user_id,
-              fullname,
-              personal_ID,
-              email,
-              product_id,
-              name,
-              amount,
-              price,
-            } = row;
+          // Use the helper function to group purchases
+          const groupedPurchases = groupPurchases(purchases);
   
-            // Check if this purchase_id already exists in the accumulator
-            if (!acc[purchase_id]) {
-              acc[purchase_id] = {
-                purchase_id,
-                date,
-                total_purchase,
-                user: {
-                  user_id,
-                  fullname,
-                  personal_ID,
-                  email,
-                },
-                products: [],
-              };
-            }
+          console.log('Grouped Purchases with User Info:', groupedPurchases);
   
-            // Add the product to the products array if it exists
-            if (product_id && name && price) {
-              acc[purchase_id].products.push({
-                product_id,
-                name,
-                amount,
-                price,
-              });
-            } else {
-              console.log(`Missing product data for purchase_id: ${purchase_id}`);
-            }
-  
-            return acc;
-          }, {});
-  
-          // Debugging: log grouped purchases
-          console.log('Grouped Purchases with User Info:', groupPurchases);
-  
-          // Return the grouped purchases as an array
-          return Object.values(groupPurchases);
+          return Object.values(groupedPurchases);
         } catch (error) {
           console.error('Error fetching purchases:', error);
           throw new Error('Error getting purchases: ' + error.message);
@@ -76,50 +30,9 @@ const purchaseResolver = {
             throw new Error(`Purchase with ID ${purchase_id} not found`);
           }
   
-          // Similar a la agrupación en getAllPurchases
-          const groupedPurchase = purchase.reduce((acc, row) => {
-            const {
-              purchase_id,
-              date,
-              total_purchase,
-              user_id,
-              fullname,
-              personal_ID,
-              email,
-              product_id,
-              name,
-              amount,
-              price,
-            } = row;
+          const groupedPurchases = groupPurchase(purchase);
   
-            if (!acc) {
-              acc = {
-                purchase_id,
-                date,
-                total_purchase,
-                user: {
-                  user_id,
-                  fullname,
-                  personal_ID,
-                  email,
-                },
-                products: [],
-              };
-            }
-  
-            if (product_id && name && price) {
-              acc.products.push({
-                product_id,
-                name,
-                amount,
-                price,
-              });
-            }
-  
-            return acc;
-          }, null);
-  
-          return groupedPurchase;
+          return groupedPurchases;
         } catch (error) {
           console.error('Error fetching purchase by ID:', error);
           throw new Error('Error getting purchase by ID: ' + error.message);
@@ -132,55 +45,29 @@ const purchaseResolver = {
           if (!purchases || purchases.length === 0) {
             throw new Error(`No purchases found for user ID ${user_id}`);
           }
-  
-          const groupedPurchases = purchases.reduce((acc, row) => {
-            const {
-              purchase_id,
-              date,
-              total_purchase,
-              user_id,
+      
+          // Extract user data from the first purchase (assuming all purchases are by the same user)
+          const { user_id: id, fullname, personal_ID, email } = purchases[0]; // All purchases have the same user data
+      
+          const groupedPurchases = groupPurchasesByUser(purchases)
+        
+      
+          // Return the response with user data and the grouped purchases
+          return {
+            user: {
+              user_id: id,
               fullname,
               personal_ID,
               email,
-              product_id,
-              name,
-              amount,
-              price,
-            } = row;
-  
-            if (!acc[purchase_id]) {
-              acc[purchase_id] = {
-                purchase_id,
-                date,
-                total_purchase,
-                user: {
-                  user_id,
-                  fullname,
-                  personal_ID,
-                  email,
-                },
-                products: [],
-              };
-            }
-  
-            if (product_id && name && price) {
-              acc[purchase_id].products.push({
-                product_id,
-                name,
-                amount,
-                price,
-              });
-            }
-  
-            return acc;
-          }, {});
-  
-          return Object.values(groupedPurchases);
+            },
+            purchases: Object.values(groupedPurchases), // This ensures the response is an array of purchases
+          };
         } catch (error) {
           console.error('Error fetching purchases by user ID:', error);
           throw new Error('Error getting purchases by user ID: ' + error.message);
         }
       },
+      
       
       getPurchasesByUsername: async(_,{username})=>{
         try {
@@ -243,6 +130,7 @@ const purchaseResolver = {
     },
 
     getPurchasesByDateRange: async (_,{startDate,endDate})=>{
+      console.log(startDate,endDate)
 
       if (!startDate || !endDate) {
         throw new Error(`No dates provided`);
@@ -260,51 +148,13 @@ const purchaseResolver = {
         const purchases = await purchaseModel.getPurchasesByDateRange(formattedStartDate,formattedEndDate)
 
         if (!purchases || purchases.length === 0) {
-          throw new Error(`No purchases found for user ID ${user_id}`);
+          throw new Error(`No purchases found between ${formattedStartDate} & ${formattedEndDate}`);
         }
 
-        const groupedPurchases = purchases.reduce((acc, row) => {
-          const {
-            purchase_id,
-            date,
-            total_purchase,
-            user_id,
-            fullname,
-            personal_ID,
-            email,
-            product_id,
-            name,
-            amount,
-            price,
-          } = row;
+        const groupedPurchases = groupPurchases(purchases);
 
-          if (!acc[purchase_id]) {
-            acc[purchase_id] = {
-              purchase_id,
-              date,
-              total_purchase,
-              user: {
-                user_id,
-                fullname,
-                personal_ID,
-                email,
-              },
-              products: [],
-            };
-          }
-
-          if (product_id && name && price) {
-            acc[purchase_id].products.push({
-              product_id,
-              name,
-              amount,
-              price,
-              
-            });
-          }
-
-          return acc;
-        }, {});
+        
+      
 
         return Object.values(groupedPurchases);
     }catch(error){

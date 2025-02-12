@@ -12,6 +12,7 @@ import authenticateToken from "./middleware/authenticationToken.js";
 import exportType from "./schema/exportType.js";
 import morgan from "morgan";
 import cors from "cors";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import limiter from "./middleware/rateLimiter.js";
 import upload from "./middleware/multer.js";
@@ -40,7 +41,7 @@ app.use(cookieParser()); // Cookie parser to read cookies
 // Rate limiter
 app.use(limiter);
 
-
+app.use(helmet());
 
 // Serve the CSRF token route
 app.get('/csrf-token', csrf.setCsrfToken); // This will set the CSRF token for the frontend
