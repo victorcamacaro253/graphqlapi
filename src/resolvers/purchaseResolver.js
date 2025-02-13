@@ -75,52 +75,23 @@ const purchaseResolver = {
           const purchases = await purchaseModel.getPurchaseByUsername(username)
 
           if (!purchases || purchases.length === 0) {
-            throw new Error(`No purchases found for user ID ${user_id}`);
+            throw new Error(`No purchases found for username ${username}`);
           }
-  
-          const groupedPurchases = purchases.reduce((acc, row) => {
-            const {
-              purchase_id,
-              date,
-              total_purchase,
-              user_id,
+           
+          // Extract user data from the first purchase (assuming all purchases are by the same user)
+          const { user_id: id, fullname, personal_ID, email } = purchases[0]; // All purchases have the same user data
+      
+          const groupedPurchases = groupPurchasesByUser(purchases)
+        
+          return {
+            user: {
+              user_id: id,
               fullname,
               personal_ID,
               email,
-              product_id,
-              name,
-              amount,
-              price,
-            } = row;
-  
-            if (!acc[purchase_id]) {
-              acc[purchase_id] = {
-                purchase_id,
-                date,
-                total_purchase,
-                user: {
-                  user_id,
-                  fullname,
-                  personal_ID,
-                  email,
-                },
-                products: [],
-              };
-            }
-  
-            if (product_id && name && price) {
-              acc[purchase_id].products.push({
-                product_id,
-                name,
-                amount,
-                price,
-              });
-            }
-  
-            return acc;
-          }, {});
-  
-          return Object.values(groupedPurchases);
+            },
+            purchases: Object.values(groupedPurchases), // This ensures the response is an array of purchases
+          };
 
 
       }catch(error){
@@ -169,51 +140,24 @@ const purchaseResolver = {
       if (!purchases || purchases.length === 0) {
         throw new Error(`No purchases found for user ID ${user_id}`);
       }
+      
 
-      const groupedPurchases = purchases.reduce((acc, row) => {
-        const {
-          purchase_id,
-          date,
-          total_purchase,
-          user_id,
-          fullname,
-          personal_ID,
-          email,
-          product_id,
-          name,
-          amount,
-          price,
-        } = row;
+    // Extract user data from the first purchase (assuming all purchases are by the same user)
+    const { user_id: id, fullname, personal_ID, email } = purchases[0]; // All purchases have the same user data
+      
+    const groupedPurchases = groupPurchasesByUser(purchases)
+  
+    return {
+      user: {
+        user_id: id,
+        fullname,
+        personal_ID,
+        email,
+      },
+      purchases: Object.values(groupedPurchases), // This ensures the response is an array of purchases
+    };
 
-        if (!acc[purchase_id]) {
-          acc[purchase_id] = {
-            purchase_id,
-            date,
-            total_purchase,
-            user: {
-              user_id,
-              fullname,
-              personal_ID,
-              email,
-            },
-            products: [],
-          };
-        }
 
-        if (product_id && name && price) {
-          acc[purchase_id].products.push({
-            product_id,
-            name,
-            amount,
-            price,
-            
-          });
-        }
-
-        return acc;
-      }, {});
-
-      return Object.values(groupedPurchases);
 
     }catch(error){
       throw new Error ( error.message)
